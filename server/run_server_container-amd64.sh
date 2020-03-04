@@ -1,0 +1,1 @@
+docker run -dit --restart=always --name="pl-server" -p 8081:8800 --privileged  -v /home/wzy/micro-docker-service:/home/wzy/micro-docker-service  plserver_ubuntu  /bin/bash  /home/wzy/micro-docker-service/server/start_server.sh

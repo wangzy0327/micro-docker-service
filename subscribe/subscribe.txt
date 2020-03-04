@@ -1,0 +1,9 @@
+java -jar  sum.jar 100 1aa9025a-5c65-11ea-a7d8-0242ac110002
+java -jar  sum.jar 100 0279f3d6-5c67-11ea-b2ee-0242ac110002
+java -jar  sum.jar 100 fd5f9088-5ce6-11ea-b2ee-0242ac110002
+java -jar  sum.jar 100 0438c0fa-5ce7-11ea-a93c-0242ac110002
+java -jar  sum.jar 100 37edc4ea-5ce7-11ea-98cd-0242ac110002
+java -jar  sum.jar 10 3d5ac162-5ce7-11ea-a7f5-0242ac110002
+java -jar  sum.jar 50 41d8d238-5ce7-11ea-9c1c-0242ac110002
+java -jar  sum.jar 20 4e269034-5ce7-11ea-8567-0242ac110002
+java -jar  sum.jar 100 10714d16-5d22-11ea-bbb4-0242ac110002

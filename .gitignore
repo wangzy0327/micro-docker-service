@@ -1,0 +1,12 @@
+
+### docker image ###
+*.img
+
+### binary file ###
+scratch0
+scratch1
+scratch2
+
+### class jar package ###
+*.jar
+*.class
