@@ -25,14 +25,14 @@ micro-docker-service
 ```
 - 静态编译go语言
 ```
-编译为amd64指令集架构,项目名为scratchHadoopProject(在GOPATH路径src目录下),编译后的二进制文件为scratchHadoop
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o scratchHadoop -ldflags '-s' scratchHadoopProject/
+编译为amd64指令集架构,项目名为microDockerProject(在GOPATH路径src目录下),编译后的二进制文件为scratch0
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o scratch0 -ldflags '-s' microDockerProject/
 
-编译为mips64le指令集架构(龙芯),项目名为scratchHadoopProject(在GOPATH路径src目录下),编译后的二进制文件为scratchHadoop0
-CGO_ENABLED=0 GOOS=linux GOARCH=mips64le go build -a -o scratchHadoop0 -ldflags '-s' scratchHadoopProject/
+编译为arm64v8指令集架构,项目名为microDockerProject(在GOPATH路径src目录下),编译后的二进制文件为scratch1
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o scratch1 -ldflags '-s' microDockerProject/
 
-编译为arm64指令集架构,项目名为scratchHadoopProject(在GOPATH路径src目录下),编译后的二进制文件为scratchHadoop1
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o scratchHadoop1 -ldflags '-s' scratchHadoopProject/
+编译为mips64le指令集架构(龙芯),项目名为microDockerProject(在GOPATH路径src目录下),编译后的二进制文件为scratch2
+CGO_ENABLED=0 GOOS=linux GOARCH=mips64le go build -a -o scratch2 -ldflags '-s' microDockerProject/
 
 ```
 
