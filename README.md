@@ -50,6 +50,19 @@ go tool dist list
 这里具体介绍一下mips64le架构的基础镜像来源
 docker pull huangxg20171010/fedora21-base
 docker tag huangxg20171010/fedora21-base fedora21-base
+
+原因分析：
+启动docker时，docker进程会创建一个名为docker0的虚拟网桥，用于宿主机与容器之间的通信。
+当启动一个docker容器时，docker容器将会附加到虚拟网桥上，容器内的报文通过docker0向外转发。
+当docker容器访问宿主机时，如果宿主机服务端口会被防火墙拦截，从而无法连通宿主机，出现No route to host的错误
+
+解决方法：（宿主机上执行）
+方法一：关闭防火墙
+systemctl stop firewalld
+方法二：在防火墙上开放指定端口
+firewall-cmd --zone=public --add-port=8081/tcp --permanent
+firewall-cmd --reload
+
 ```
 
 ### 状态机
