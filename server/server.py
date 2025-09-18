@@ -1,84 +1,234 @@
 #coding:utf-8
-import commands 
-from flask import Flask
-from flask import request,jsonify
-import time
+import subprocess
+import requests
 import threading
-import random
+import logging
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from flask import Flask, request, jsonify
 import uuid
+import time
+import re
+import traceback
 
-app=Flask(__name__)
+# 修复中文编码问题：强制stdout/stderr使用UTF-8
+try:
+    sys.stdout.buffer.write('\ufffd'.encode('utf-8'))  # 测试编码支持
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
+except:
+    pass  # 忽略不支持的环境
+
+# 配置日志（移除中文，使用英文避免编码问题）
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("server.log", encoding='utf-8'),  # 日志文件强制UTF-8
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# 初始化Flask应用
+app = Flask(__name__)
+# 创建线程池控制并发任务数
+executor = ThreadPoolExecutor(max_workers=10)
+
+def parse_shell(shcmd):
+    """Execute command and parse output"""
+    try:
+        logger.info("Executing command: %s" % shcmd)
+        p = subprocess.Popen(
+            shcmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            universal_newlines=True
+        )
+        stdout, stderr = p.communicate(timeout=300)
+        combined = stdout + "\n" + stderr
+
+        if p.returncode != 0:
+            logger.error("Command failed (return code: %s), output: %s" % (p.returncode, combined))
+            return False, combined
+        else:
+            logger.info("Command executed successfully, return code: %s" % p.returncode)
+
+        # Extract model information
+        pattern = r"(I\d{4} \d{2}:\d{2}:\d{2}\.\d{6} +\d+ caffe\.cpp:495\] execution time: .*? us)"
+        match = re.search(pattern, combined, re.DOTALL | re.IGNORECASE)
+
+        if match:
+            model_info = match.group(0).strip()
+            logger.info("Extracted model info: %s" % model_info)
+            return True, model_info
+        else:
+            logger.warning("No execution time found, returning full output")
+            return True, combined
+
+    except subprocess.TimeoutExpired:
+        p.kill()
+        error_msg = "Command timed out (5 minutes)"
+        logger.error(error_msg)
+        return False, error_msg
+    except Exception as e:
+        error_msg = "Command execution error: %s" % str(e)
+        logger.error(error_msg)
+        logger.error("Traceback: %s" % traceback.format_exc())
+        return False, error_msg
+
+
+def async_process_task(input_path, output_path, uuid_str, callback_url):
+    """Process task asynchronously"""
+    try:
+        logger.info("[Async Task] Starting processing UUID: %s" % uuid_str)
+        logger.info("[Async Task] Input path: %s, Output path: %s" % (input_path, output_path))
+
+        # Execute inference command
+        inference_cmd = "cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh"
+        success, result_output = parse_shell(inference_cmd)
+        
+        # Build task result
+        task_result = {
+            "status": "success" if success else "failed",
+            "cmd": inference_cmd,
+            "output": result_output,
+            "input_path": input_path,
+            "output_path": output_path,
+            "execution_time": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        # Callback to client
+        if callback_url:
+            logger.info("[Async Task] Calling back client: %s" % callback_url)
+            callback_data = {
+                "uuid": uuid_str,
+                "task_status": task_result["status"],
+                "result": task_result
+            }
+
+            response = requests.post(
+                url=callback_url,
+                json=callback_data,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            logger.info("[Async Task] Callback completed, status code: %s, response: %s" % (response.status_code, response.text))
+        else:
+            logger.warning("[Async Task] No callback URL provided, skipping callback")
+
+    except Exception as e:
+        error_msg = "Task processing error: %s" % str(e)
+        logger.error(error_msg)
+        logger.error("Traceback: %s" % traceback.format_exc())
+        if callback_url:
+            try:
+                requests.post(
+                    url=callback_url,
+                    json={
+                        "uuid": uuid_str,
+                        "task_status": "error",
+                        "error_msg": error_msg
+                    },
+                    headers={"Content-Type": "application/json"},
+                    timeout=10
+                )
+            except Exception as ce:
+                logger.error("Failed to send error callback: %s" % str(ce))
+    finally:
+        logger.info("[Async Task] Processing finished UUID: %s" % uuid_str)
+
 
 @app.route('/pipeline', methods=['POST'])
-def post_route():
-     #execute a cmd
-     def exec_cmd(cmd):
-        status_cmd,output_cmd = commands.getstatusoutput(cmd)
-        print('status of cmd: '+str(status_cmd))
-        print('result of cmd: '+output_cmd)
-        return output_cmd
-
-     if request.method == 'POST':
-        headers = request.headers
-        
-    #parse json request, get ipy_path 
+def handle_pipeline():
+    try:
         data = request.get_json()
-        print'headers:',headers
-        print('Data Received: "{data}"'.format(data=data))
-        ipy_path = data["ipy_path"]
-        print('ipy_path: '+ipy_path)
-        pipeline_name = data["pipeline"]
-        print('pipeline: '+pipeline_name)
+        logger.info("Received /pipeline request: %s" % data)
 
-    #au prepare shell to start container
+        ipy_path = data["ipy_path"]
+        pipeline_name = data["pipeline"]
+        logger.info("ipy_path: %s, pipeline_name: %s" % (ipy_path, pipeline_name))
+
         root_path = "/home/pipeline_server/shells/"
-        name_shell_exec = 'start.sh'
-        cmd_shell_exec = root_path + name_shell_exec+' '+ ipy_path
-        output = exec_cmd(cmd_shell_exec)
-        print('response output: '+output)
-        return output
-	#results = exec_cmd(cmd_list_output)
-        
-        return "cannot find the ipy path"
+        cmd = "%sstart.sh %s" % (root_path, ipy_path)
+        output = subprocess.run(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+        return jsonify({
+            "status": "success" if output.returncode == 0 else "failed",
+            "output": output.stdout + output.stderr
+        })
+
+    except KeyError as e:
+        error_msg = "Missing parameter: %s" % e
+        logger.error(error_msg)
+        return error_msg, 400
+    except Exception as e:
+        error_msg = "Server error: %s" % str(e)
+        logger.error(error_msg)
+        logger.error("Traceback: %s" % traceback.format_exc())
+        return error_msg, 500
+
 
 @app.route('/micro', methods=['POST'])
-def handler_hadoop():
-   #execute a cmd
-     def exec_cmd(cmd):
-        status_cmd,output_cmd = commands.getstatusoutput(cmd)
-        print('status of cmd: '+str(status_cmd))
-        print('result of cmd: '+output_cmd)
-        return output_cmd
-    
-     if request.method == 'POST':
-        headers = request.headers
-
-    #parse json request, get ipy_path 
+def handle_micro():
+    try:
+        # Log request details
+        logger.info("Received /micro request, headers: %s" % request.headers)
         data = request.get_json()
-        print'headers:',headers
-        print('Data Received: "{data}"'.format(data=data))
+        if not data:
+            data = request.form  # Compatible with form-data
+        logger.info("Received /micro request data: %s" % data)
+
+        # Validate required parameters
+        required_params = ["input", "callback_url"]
+        for param in required_params:
+            if param not in data:
+                error_msg = "Missing parameter: %s" % param
+                logger.error(error_msg)
+                return error_msg, 400
+
         input_path = data["input"]
-        print('input path: '+input_path)
-        #output_path = data["output"]
-        #print('output path: '+output_path)
+        output_path = data.get("output", "")
+        callback_url = data["callback_url"]
 
-    #au prepare read request to queue
-        base_path = "/home/wzy/micro-docker-service/"
-        root_path = "/root/"
-        exec_file = "sum.jar"
-        publish_path = "publish/publish.txt"
-        uuid_str=str(uuid.uuid1())
-        print("uuid : "+uuid_str)
-        cmd_shell_exec = 'echo "java -jar  '+ exec_file +' '+ input_path +' '+ uuid_str +'" >>  ' + base_path + publish_path
-        #cmd_shell_exec = 'echo "'+ input_path +' '+ uuid_str +'" >>  ' + base_path + publish_path
-        output = exec_cmd(cmd_shell_exec)
-        print('response output: '+output)
+        # Generate UUID
+        uuid_str = str(uuid.uuid1())
+        logger.info("Generated UUID: %s" % uuid_str)
+
+        # Submit async task
+        executor.submit(
+            async_process_task,
+            input_path,
+            output_path,
+            uuid_str,
+            callback_url
+        )
+
         return uuid_str
-        #results = exec_cmd(cmd_list_output)
 
-        return "cannot find the input output path"
-     
+    except KeyError as e:
+        error_msg = "Missing parameter: %s" % e
+        logger.error(error_msg)
+        return error_msg, 400
+    except Exception as e:
+        error_msg = "Server error: %s" % str(e)
+        logger.error(error_msg)
+        logger.error("Traceback: %s" % traceback.format_exc())
+        return error_msg, 500
 
-if __name__=="__main__":
-        app.run(debug=True,threaded=True,host="0.0.0.0",port=8800)
 
+if __name__ == "__main__":
+    logger.info("Starting MLU inference server...")
+    app.run(
+        debug=False,
+        threaded=True,
+        host="0.0.0.0",
+        port=8800
+    )

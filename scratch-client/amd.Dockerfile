@@ -1,5 +1,5 @@
 FROM scratch
-ENV NODE_NAME 10.18.127.2
-ENV SUBSCRIBE_PATH /home/wzy/micro-docker-service/subscribe/subscribe.txt
+ENV NODE_NAME 10.208.16.106
+ENV PORT 8800
 ADD scratch0 /
-CMD ["/scratch0","10"]
+CMD ["/scratch0"]

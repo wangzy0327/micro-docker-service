@@ -1,6 +1,11 @@
-current=`date "+%Y-%m-%d %H:%M:%S"`
-timeStamp=`date -d "$current" +%s`
-currentTimeStamp=$((10#$timeStamp*1000+10#`date "+%N"`/1000000))
-beforeStartTime=`echo "scale=3;$currentTimeStamp/1000"|bc`
-echo "开始时间戳:"$beforeStartTime
-docker run -it -v /home/wzy/micro-docker-service/:/home/wzy/micro-docker-service scratch-client /scratch0 -input 100
+# 设置时区为 Asia/Shanghai
+export TZ='Asia/Shanghai'
+
+# 获取当前时间，格式：HH:MM:SS.mmm（毫秒）
+current_time=$(date +"%H:%M:%S.%3N")
+
+# 输出
+echo "开始时间: $current_time"
+
+# 运行 Docker 命令
+docker run --privileged --net=host -it -v /dev:/dev  -v /proc:/proc -e START_TIME="$current_time" scratch-client /scratch0

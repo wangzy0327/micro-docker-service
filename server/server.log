@@ -1,0 +1,196 @@
+2025-09-17 06:58:09,605 - INFO - Starting MLU inference server...
+2025-09-17 06:58:09,609 - INFO -  * Running on http://0.0.0.0:8800/ (Press CTRL+C to quit)
+2025-09-17 06:58:15,794 - INFO - 172.17.0.1 - - [17/Sep/2025 06:58:15] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-17 07:00:46,854 - INFO - Starting MLU inference server...
+2025-09-17 07:00:46,856 - INFO -  * Running on http://0.0.0.0:8800/ (Press CTRL+C to quit)
+2025-09-17 07:00:52,401 - INFO - Received /micro request, headers: Accept-Encoding: gzip
+Content-Length: 110
+Content-Type: application/json;charset=UTF-8
+User-Agent: Go-http-client/1.1
+Host: localhost:8800
+
+
+2025-09-17 07:00:52,402 - INFO - Received /micro request data: {'input': 'input/input1', 'callback_url': 'http://10.208.16.106:40601/client/callback', 'output': 'output/output1'}
+2025-09-17 07:00:52,403 - INFO - Generated UUID: 0c9539ec-9394-11f0-8687-0242ac110002
+2025-09-17 07:00:52,404 - INFO - [Async Task] Starting processing UUID: 0c9539ec-9394-11f0-8687-0242ac110002
+2025-09-17 07:00:52,406 - INFO - 172.17.0.1 - - [17/Sep/2025 07:00:52] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-17 07:00:52,406 - INFO - [Async Task] Input path: input/input1, Output path: output/output1
+2025-09-17 07:00:52,407 - INFO - Executing command: cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh
+2025-09-17 07:01:11,715 - INFO - Command executed successfully, return code: 0
+2025-09-17 07:01:11,733 - INFO - Extracted model info: I0917 07:01:11.621770   102 caffe.cpp:495] execution time: 1.87554e+07 us
+2025-09-17 07:01:11,733 - INFO - [Async Task] Calling back client: http://10.208.16.106:40601/client/callback
+2025-09-17 07:01:11,739 - INFO - [Async Task] Callback completed, status code: 200, response: callback received success
+2025-09-17 07:01:11,739 - INFO - [Async Task] Processing finished UUID: 0c9539ec-9394-11f0-8687-0242ac110002
+2025-09-17 07:12:37,142 - INFO - Starting MLU inference server...
+2025-09-17 07:12:37,145 - INFO -  * Running on http://0.0.0.0:8800/ (Press CTRL+C to quit)
+2025-09-17 07:21:47,052 - INFO - Received /micro request, headers: Accept-Encoding: gzip
+Host: localhost:8800
+Content-Length: 110
+Content-Type: application/json;charset=UTF-8
+User-Agent: Go-http-client/1.1
+
+
+2025-09-17 07:21:47,053 - INFO - Received /micro request data: {'output': 'output/output1', 'callback_url': 'http://10.208.16.106:34547/client/callback', 'input': 'input/input1'}
+2025-09-17 07:21:47,054 - INFO - Generated UUID: f869c0f2-9396-11f0-8f24-0242ac110002
+2025-09-17 07:21:47,055 - INFO - [Async Task] Starting processing UUID: f869c0f2-9396-11f0-8f24-0242ac110002
+2025-09-17 07:21:47,057 - INFO - 172.17.0.1 - - [17/Sep/2025 07:21:47] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-17 07:21:47,057 - INFO - [Async Task] Input path: input/input1, Output path: output/output1
+2025-09-17 07:21:47,058 - INFO - Executing command: cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh
+2025-09-17 07:22:06,888 - INFO - Command executed successfully, return code: 0
+2025-09-17 07:22:06,902 - INFO - Extracted model info: I0917 07:22:06.789326   178 caffe.cpp:495] execution time: 1.92424e+07 us
+2025-09-17 07:22:06,902 - INFO - [Async Task] Calling back client: http://10.208.16.106:34547/client/callback
+2025-09-17 07:22:06,909 - INFO - [Async Task] Callback completed, status code: 200, response: callback received success
+2025-09-17 07:22:06,909 - INFO - [Async Task] Processing finished UUID: f869c0f2-9396-11f0-8f24-0242ac110002
+2025-09-18 02:00:08,094 - INFO - Received /micro request, headers: Accept-Encoding: gzip
+Host: localhost:8800
+Content-Length: 110
+Content-Type: application/json;charset=UTF-8
+User-Agent: Go-http-client/1.1
+
+
+2025-09-18 02:00:08,118 - INFO - Received /micro request data: {'output': 'output/output1', 'callback_url': 'http://10.208.16.106:41641/client/callback', 'input': 'input/input1'}
+2025-09-18 02:00:08,119 - INFO - Generated UUID: 33c3b4fe-9433-11f0-822f-0242ac110002
+2025-09-18 02:00:08,120 - INFO - [Async Task] Starting processing UUID: 33c3b4fe-9433-11f0-822f-0242ac110002
+2025-09-18 02:00:08,121 - INFO - [Async Task] Input path: input/input1, Output path: output/output1
+2025-09-18 02:00:08,123 - INFO - 172.17.0.1 - - [18/Sep/2025 02:00:08] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-18 02:00:08,123 - INFO - Executing command: cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh
+2025-09-18 02:00:28,734 - INFO - Command executed successfully, return code: 0
+2025-09-18 02:00:28,747 - INFO - Extracted model info: I0918 02:00:28.570708   235 caffe.cpp:495] execution time: 1.91546e+07 us
+2025-09-18 02:00:28,747 - INFO - [Async Task] Calling back client: http://10.208.16.106:41641/client/callback
+2025-09-18 02:00:28,756 - INFO - [Async Task] Callback completed, status code: 200, response: callback received success
+2025-09-18 02:00:28,756 - INFO - [Async Task] Processing finished UUID: 33c3b4fe-9433-11f0-822f-0242ac110002
+2025-09-18 02:01:25,698 - INFO - Received /micro request, headers: Accept-Encoding: gzip
+Host: 10.208.16.106:8800
+Content-Length: 110
+Content-Type: application/json;charset=UTF-8
+User-Agent: Go-http-client/1.1
+
+
+2025-09-18 02:01:25,699 - INFO - Received /micro request data: {'output': 'output/output1', 'callback_url': 'http://10.208.16.106:36323/client/callback', 'input': 'input/input1'}
+2025-09-18 02:01:25,700 - INFO - Generated UUID: 62019796-9433-11f0-9bd5-0242ac110002
+2025-09-18 02:01:25,700 - INFO - [Async Task] Starting processing UUID: 62019796-9433-11f0-9bd5-0242ac110002
+2025-09-18 02:01:25,702 - INFO - 10.208.16.106 - - [18/Sep/2025 02:01:25] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-18 02:01:25,702 - INFO - [Async Task] Input path: input/input1, Output path: output/output1
+2025-09-18 02:01:25,703 - INFO - Executing command: cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh
+2025-09-18 02:01:45,317 - INFO - Command executed successfully, return code: 0
+2025-09-18 02:01:45,332 - INFO - Extracted model info: I0918 02:01:45.211846   292 caffe.cpp:495] execution time: 1.90063e+07 us
+2025-09-18 02:01:45,333 - INFO - [Async Task] Calling back client: http://10.208.16.106:36323/client/callback
+2025-09-18 02:01:45,337 - INFO - [Async Task] Callback completed, status code: 200, response: callback received success
+2025-09-18 02:01:45,337 - INFO - [Async Task] Processing finished UUID: 62019796-9433-11f0-9bd5-0242ac110002
+2025-09-18 02:05:15,157 - INFO - Received /micro request, headers: Accept-Encoding: gzip
+Host: 10.208.16.106:8800
+Content-Length: 110
+Content-Type: application/json;charset=UTF-8
+User-Agent: Go-http-client/1.1
+
+
+2025-09-18 02:05:15,158 - INFO - Received /micro request data: {'output': 'output/output1', 'callback_url': 'http://10.208.16.106:39755/client/callback', 'input': 'input/input1'}
+2025-09-18 02:05:15,158 - INFO - Generated UUID: eac63a32-9433-11f0-b2bc-0242ac110002
+2025-09-18 02:05:15,159 - INFO - [Async Task] Starting processing UUID: eac63a32-9433-11f0-b2bc-0242ac110002
+2025-09-18 02:05:15,161 - INFO - 10.208.16.106 - - [18/Sep/2025 02:05:15] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-18 02:05:15,161 - INFO - [Async Task] Input path: input/input1, Output path: output/output1
+2025-09-18 02:05:15,162 - INFO - Executing command: cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh
+2025-09-18 02:05:35,004 - INFO - Command executed successfully, return code: 0
+2025-09-18 02:05:35,017 - INFO - Extracted model info: I0918 02:05:34.911113   349 caffe.cpp:495] execution time: 1.92635e+07 us
+2025-09-18 02:05:35,017 - INFO - [Async Task] Calling back client: http://10.208.16.106:39755/client/callback
+2025-09-18 02:05:35,022 - INFO - [Async Task] Callback completed, status code: 200, response: callback received success
+2025-09-18 02:05:35,023 - INFO - [Async Task] Processing finished UUID: eac63a32-9433-11f0-b2bc-0242ac110002
+2025-09-18 02:17:08,562 - INFO - Received /micro request, headers: Accept-Encoding: gzip
+Host: localhost:8800
+Content-Length: 110
+Content-Type: application/json;charset=UTF-8
+User-Agent: Go-http-client/1.1
+
+
+2025-09-18 02:17:08,563 - INFO - Received /micro request data: {'output': 'output/output1', 'callback_url': 'http://10.208.16.106:33575/client/callback', 'input': 'input/input1'}
+2025-09-18 02:17:08,564 - INFO - Generated UUID: 93ff3c06-9435-11f0-9d22-0242ac110002
+2025-09-18 02:17:08,564 - INFO - [Async Task] Starting processing UUID: 93ff3c06-9435-11f0-9d22-0242ac110002
+2025-09-18 02:17:08,566 - INFO - 172.17.0.1 - - [18/Sep/2025 02:17:08] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-18 02:17:08,566 - INFO - [Async Task] Input path: input/input1, Output path: output/output1
+2025-09-18 02:17:08,567 - INFO - Executing command: cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh
+2025-09-18 02:17:27,966 - INFO - Command executed successfully, return code: 0
+2025-09-18 02:17:27,983 - INFO - Extracted model info: I0918 02:17:27.882400   406 caffe.cpp:495] execution time: 1.88428e+07 us
+2025-09-18 02:17:27,984 - INFO - [Async Task] Calling back client: http://10.208.16.106:33575/client/callback
+2025-09-18 02:17:27,987 - ERROR - Task processing error: HTTPConnectionPool(host='10.208.16.106', port=33575): Max retries exceeded with url: /client/callback (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f325de90e48>: Failed to establish a new connection: [Errno 111] Connection refused',))
+2025-09-18 02:17:28,007 - ERROR - Traceback: Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/connection.py", line 175, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/util/connection.py", line 95, in create_connection
+    raise err
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/util/connection.py", line 85, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/connectionpool.py", line 710, in urlopen
+    chunked=chunked,
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/connectionpool.py", line 398, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/connection.py", line 239, in request
+    super(HTTPConnection, self).request(method, url, body=body, headers=headers)
+  File "/usr/lib/python3.5/http/client.py", line 1134, in request
+    self._send_request(method, url, body, headers)
+  File "/usr/lib/python3.5/http/client.py", line 1179, in _send_request
+    self.endheaders(body)
+  File "/usr/lib/python3.5/http/client.py", line 1130, in endheaders
+    self._send_output(message_body)
+  File "/usr/lib/python3.5/http/client.py", line 946, in _send_output
+    self.send(msg)
+  File "/usr/lib/python3.5/http/client.py", line 889, in send
+    self.connect()
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/connection.py", line 205, in connect
+    conn = self._new_conn()
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/connection.py", line 187, in _new_conn
+    self, "Failed to establish a new connection: %s" % e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x7f325de90e48>: Failed to establish a new connection: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/requests/adapters.py", line 449, in send
+    timeout=timeout
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/connectionpool.py", line 786, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "/usr/local/lib/python3.5/dist-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='10.208.16.106', port=33575): Max retries exceeded with url: /client/callback (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f325de90e48>: Failed to establish a new connection: [Errno 111] Connection refused',))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "server.py", line 116, in async_process_task
+    timeout=10
+  File "/usr/local/lib/python3.5/dist-packages/requests/api.py", line 119, in post
+    return request('post', url, data=data, json=json, **kwargs)
+  File "/usr/local/lib/python3.5/dist-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/local/lib/python3.5/dist-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/local/lib/python3.5/dist-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/local/lib/python3.5/dist-packages/requests/adapters.py", line 516, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPConnectionPool(host='10.208.16.106', port=33575): Max retries exceeded with url: /client/callback (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f325de90e48>: Failed to establish a new connection: [Errno 111] Connection refused',))
+
+2025-09-18 02:17:28,012 - ERROR - Failed to send error callback: HTTPConnectionPool(host='10.208.16.106', port=33575): Max retries exceeded with url: /client/callback (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f325de749e8>: Failed to establish a new connection: [Errno 111] Connection refused',))
+2025-09-18 02:17:28,012 - INFO - [Async Task] Processing finished UUID: 93ff3c06-9435-11f0-9d22-0242ac110002
+2025-09-18 02:20:10,440 - INFO - Received /micro request, headers: Accept-Encoding: gzip
+Host: 10.208.16.106:8800
+Content-Length: 110
+Content-Type: application/json;charset=UTF-8
+User-Agent: Go-http-client/1.1
+
+
+2025-09-18 02:20:10,441 - INFO - Received /micro request data: {'output': 'output/output1', 'callback_url': 'http://10.208.16.106:37345/client/callback', 'input': 'input/input1'}
+2025-09-18 02:20:10,442 - INFO - Generated UUID: 006798ac-9436-11f0-a40b-0242ac110002
+2025-09-18 02:20:10,442 - INFO - [Async Task] Starting processing UUID: 006798ac-9436-11f0-a40b-0242ac110002
+2025-09-18 02:20:10,443 - INFO - 10.208.16.106 - - [18/Sep/2025 02:20:10] "[37mPOST /micro HTTP/1.1[0m" 200 -
+2025-09-18 02:20:10,443 - INFO - [Async Task] Input path: input/input1, Output path: output/output1
+2025-09-18 02:20:10,444 - INFO - Executing command: cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh
+2025-09-18 02:20:30,298 - INFO - Command executed successfully, return code: 0
+2025-09-18 02:20:30,313 - INFO - Extracted model info: I0918 02:20:30.184034   463 caffe.cpp:495] execution time: 1.93162e+07 us
+2025-09-18 02:20:30,313 - INFO - [Async Task] Calling back client: http://10.208.16.106:37345/client/callback
+2025-09-18 02:20:30,318 - INFO - [Async Task] Callback completed, status code: 200, response: callback received success
+2025-09-18 02:20:30,318 - INFO - [Async Task] Processing finished UUID: 006798ac-9436-11f0-a40b-0242ac110002

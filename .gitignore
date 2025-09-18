@@ -10,3 +10,4 @@ scratch2
 ### class jar package ###
 *.jar
 *.class
+*.bak

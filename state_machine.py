@@ -1,7 +1,7 @@
 import subprocess
-
 import os
 import time
+import re
 
 class State():
     count = 10
@@ -12,99 +12,117 @@ class State():
     uuid = []
 
     def get_shcmd(self,file_name):
-        f = open(file_name)
-        self.shcmd = []
-        self.uuid = []
-        for i in range(self.count):
-            sstr = f.readline().strip()
-            if sstr != None and sstr.strip()!='':
-                self.shcmd.append(sstr)
-                print("shcmd : "+sstr)
-                self.uuid.append(sstr.split()[-1])
-                print("uuid : "+sstr.split()[-1])
-        pass
+        with open(file_name) as f:
+            self.shcmd = []
+            self.uuid = []
+            for i in range(self.count):
+                sstr = f.readline().strip()
+                if sstr:
+                    self.shcmd.append(sstr)
+                    print("task id : "+sstr)
+                    #self.uuid.append(sstr.split()[-1])
+                    #print("uuid : "+sstr.split()[-1])
 
     def parse_shell(self,shcmd):
-        p = subprocess.Popen(shcmd,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)	
+        '''
+        p = subprocess.Popen(shcmd,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         stdout,stderr = p.communicate()
         if p.returncode != 0:
            print(str(stderr,encoding="utf-8").strip('\n'))
-           return str(stderr,encoding="utf-8").strip('\n')
-        return str(stdout,encoding="utf-8".strip('\n'))
-        pass
+           return False, str(stderr,encoding="utf-8").strip('\n')
+        return True, str(stdout,encoding="utf-8").strip('\n')
+        '''
+        # 执行命令并捕获输出
+        p = subprocess.Popen(
+            shcmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            universal_newlines=True  # 直接返回字符串，无需 decode
+        )
+        stdout, stderr = p.communicate()
 
+        # 合并输出（关键！）
+        combined = stdout + "\n" + stderr
 
+        #print("=== STDOUT ===")
+        #print(stdout)
+        #print("=== STDERR ===")
+        #print(stderr)
+        #print("=== RETURN CODE:", p.returncode)
 
-    def get_last_lines(self,file_name,count):
-        file_size = os.path.getsize(file_name)
-        block_size = 1024
-        file = open(file_name,'r')
-        # last_line = ""
-        if file_size > block_size:
-            # maxseekpoint = (file_size//block_size)
-            maxseekpoint = file_size - block_size if file_size >= block_size else 0
-            # remainder = (file_size%block_size)
-            file.seek(maxseekpoint)
-        elif file_size:
-            file.seek(0,0)
-        lines = file.readlines()
-        if lines :
-            last_line = [ s.strip() for s in lines[-1*count:]]
-            #print("last_line : ",last_line)
-        file.close()
-        time.sleep(1.5)
-        return lines
-        pass
+        # 检查是否执行失败
+        if p.returncode != 0:
+            print("Command failed with return code:",p.returncode)
+            print("Output:\n",combined)
+            return False, None
 
+        # 使用正则提取模型信息块
+        #pattern = r'.*?Offline model information BEGIN.*?\n.*?Offline model information END.*?'
+        # 尝试匹配：模型块 + 可选的下一行 execution time
+        #pattern = r'(.*?Offline model information BEGIN.*?\n.*?Offline model information END.*?)(\n\s*I\d{6}.*?execution time.*?us)?'
+        #pattern = r'I\d{6} \d{2}:\d{2}:\d{2}\.\d{6}.*?execution time: .*?us'
+        #pattern = r"(\*{40} Offline model information BEGIN \*{40}\n.*?\*{41} Offline model information END \*{41})"
+        pattern = r"(I\d{4} \d{2}:\d{2}:\d{2}\.\d{6} +\d+ caffe\.cpp:495\] execution time: .*? us)"
+        match = re.search(pattern, combined, re.DOTALL | re.IGNORECASE)
+
+        if match:
+            print("===== Matched Execution Time Line ====")
+            # 提取完整的信息块（包括 BEGIN 和 END 行）
+            model_info = match.group(0).strip()
+            #print(model_info)  # 只打印你关心的部分
+            return True, model_info
+        else:
+            print("Warning: Could not find offline model information in output.")
+            # 如果没找到，也可以选择打印全部输出用于调试
+            # print(stdout)
+            return True, combined  # 即使没提取到，也算“成功”，但返回原始输出
+
+    def update_files(self, completed_tasks):
+        # 更新 publish.txt，移除已完成的任务
+        with open(self.publish_output, 'r') as file:
+            lines = file.readlines()
+        with open(self.publish_output, 'w') as file:
+            for line in lines:
+                if line.strip() not in completed_tasks:
+                    file.write(line)
+
+        # 将已完成的任务写入 subscribe.txt
+        with open(self.subscribe_output, 'a') as file:
+            for task in completed_tasks:
+                file.write(task + '\n')
 
     def exec_cmd(self):
         sh_num = len(self.shcmd)
         print("sh_num is " + str(sh_num))
-        i = 0
-        while i < sh_num:
-            res = self.parse_shell(
-                "docker run -v /home/wzy/micro-docker-service/:/root/ sum-java " + self.shcmd[i])
-            print("docker run -v /home/wzy/micro-docker-service/:/root/ sum-java "+self.shcmd[i])
-            print("exec business docker "+self.shcmd[i])
-            print(res)
-            i+=1
-        pass        
+        completed_tasks = []
+        for cmd in self.shcmd:
+            res, output = self.parse_shell(
+                "docker exec elastic_neumann bash -c 'cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh' ")
+            print(f"Executing: {cmd}\nResult: {res}\nOutput: {output}")
+            if res:
+                completed_tasks.append(cmd)
+        if completed_tasks:
+            self.update_files(completed_tasks)
 
     def go(self):
-        i = 0
-        #while True:
-        while i < 1:
-            print("\033[1;35m get_shcmd \033[0m")
-            self.get_shcmd(self.publish_output)
-            print("\033[1;35m exec_cmd \033[0m")
-            self.exec_cmd()
-            i+=1
-        #pass
+        print("\033[1;35m get_task \033[0m")
+        self.get_shcmd(self.publish_output)
+        print("\033[1;35m exec_cmd \033[0m")
+        self.exec_cmd()
 
     def end_symbol(self):
-        symbol = open('symbol','w')
-        symbol.write('end\n')
-        symbol.close()
-        pass
+        with open('symbol','w') as symbol:
+            symbol.write('end\n')
 
 
 if __name__ == "__main__":
     state = State()
-    #state.get_shcmd(State.publish_output)
-    #state.extend_group(3)
-    #state.reduce_group()
-    #lines = state.get_last_lines(state.subscribe_output,10)
-    #state.shcmd=['sh run-wordcount2.sh input/input1 output/output1 908f7dee-0a6e-11ea-84ff-35f681938c05','sh run-wordcount2.sh input/input1 output/output1 a2d1d326-0a6e-11ea-84ff-35f681938c05','sh run-wordcount2.sh input/input2 output/output2 aed091c6-0a6e-11ea-84ff-35f681938c05','sh run-wordcount2.sh input/input3 output/output3 ab970ad0-0a6e-11ea-84ff-35f681938c05']
-    #state.hadoop_list=['hadoop-master-0','hadoop-master-1','hadoop-master-2']
-    #state.uuid=['908f7dee-0a6e-11ea-84ff-35f681938c05','a2d1d326-0a6e-11ea-84ff-35f681938c05','aed091c6-0a6e-11ea-84ff-35f681938c05','ab970ad0-0a6e-11ea-84ff-35f681938c05']
-    #state.exec_cmd()
-    #state.parse_shell("docker exec -d hadoop-master-0 bash -c 'sh run-wordcount2.sh input/input1 output/output1 908f7dee-0a6e-11ea-84ff-35f681938c05' ")
     startTime = round(time.time(),3)
-    print('\033[1;35m 开始时间戳:'+str(startTime)+" \033[0m")
     state.go()
     state.end_symbol()
     endTime = round(time.time(),3)
-    print('\033[1;35m 结束时间戳:'+str(endTime)+" \033[0m")
     diffTime = endTime - startTime
     print("processing time : "+str(diffTime))
     print("______________end______________")

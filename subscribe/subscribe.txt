@@ -1,9 +1,17 @@
-java -jar  sum.jar 100 1aa9025a-5c65-11ea-a7d8-0242ac110002
-java -jar  sum.jar 100 0279f3d6-5c67-11ea-b2ee-0242ac110002
-java -jar  sum.jar 100 fd5f9088-5ce6-11ea-b2ee-0242ac110002
-java -jar  sum.jar 100 0438c0fa-5ce7-11ea-a93c-0242ac110002
-java -jar  sum.jar 100 37edc4ea-5ce7-11ea-98cd-0242ac110002
-java -jar  sum.jar 10 3d5ac162-5ce7-11ea-a7f5-0242ac110002
-java -jar  sum.jar 50 41d8d238-5ce7-11ea-9c1c-0242ac110002
-java -jar  sum.jar 20 4e269034-5ce7-11ea-8567-0242ac110002
-java -jar  sum.jar 100 10714d16-5d22-11ea-bbb4-0242ac110002
+1aa9025a-5c65-11ea-a7d8-0242ac110002
+0279f3d6-5c67-11ea-b2ee-0242ac110002
+fd5f9088-5ce6-11ea-b2ee-0242ac110002
+0438c0fa-5ce7-11ea-a93c-0242ac110002
+37edc4ea-5ce7-11ea-98cd-0242ac110002
+3d5ac162-5ce7-11ea-a7f5-0242ac110002
+41d8d238-5ce7-11ea-9c1c-0242ac110002
+4e269034-5ce7-11ea-8567-0242ac110002
+10714d16-5d22-11ea-bbb4-0242ac110002
+a9126e5a-5db4-11ea-9893-0242ac110002
+afa7657c-5dc3-11ea-8dfc-0242ac110002
+b4562ce8-5dc3-11ea-8761-0242ac110002
+b684c20e-5dc3-11ea-a5f4-0242ac110002
+cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh input/input1 3dac059c-936c-11f0-a907-09c8aa40ab4c
+cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh input/input1 94e397a8-936c-11f0-a907-09c8aa40ab4c
+cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh input/input1 a73e2c3e-9375-11f0-a907-09c8aa40ab4c
+cd /opt/cambricon/caffe/src/caffe && bash gen_offline_model.sh input/input1 89f08430-9378-11f0-a907-09c8aa40ab4c
