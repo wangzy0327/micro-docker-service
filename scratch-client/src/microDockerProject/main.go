@@ -5,19 +5,22 @@ import (
     // "microDockerProject/polling"
     "fmt"
     "flag"
-	"net"       // 新增：网络操作（动态端口、IP获取）
-	"net/http"
-	"os"
-	// "strconv"   // 新增：整数转字符串（端口处理
-	"sync"
+    "net"       // 新增：网络操作（动态端口、IP获取）
+    "net/http"
+    "os"
+    // "strconv"   // 新增：整数转字符串（端口处理
+    "sync"
     "time"
-	"io/ioutil" // 新增这行
+    "io/ioutil" // 新增这行
     "embed"  //嵌入时区
+    "strings"
+    "encoding/json"
 )
 
 
 var input string
 var output string
+var taskType string
 var nodeIp string
 // var callbackPort = "8082" // 客户端回调服务端口（需确保与服务端网络互通）
 var callbackPort string // 客户端回调服务端口（需确保与服务端网络互通）
@@ -28,11 +31,14 @@ var wg sync.WaitGroup              // 等待回调结果，避免程序提前退
 //go:embed tzdata/Asia/Shanghai
 var tzData embed.FS
 
+// 【关键配置】默认时间文件路径（需与K8s YAML中共享卷的路径完全一致）
+const defaultTimeFilePath = "/time/start-time.txt"
 
 func Init(){
 	//flag.StringVar(&nodeIp,"nodeIp","10.18.127.4","cluster node ip")
 	flag.StringVar(&input,"input","input/input1","project input")
 	flag.StringVar(&output,"output","output/output1","project output")
+    flag.StringVar(&taskType, "type", "hadoop", "Task type: micro/hadoop") // 新增任务类型参数
 }
 
 // 获取环境变量或默认值
@@ -52,9 +58,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 读取服务端回调的JSON数据
-	// 关键修复：用 ioutil.ReadAll 替换 http.ReadAll
-	// respBody, err := http.ReadAll(r.Body)
+	// 1. 读取服务端回调的JSON数据
 	respBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -63,8 +67,35 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 将结果发送到通道，通知主逻辑
-	resultChan <- string(respBody)
+	// 2. 关键修改：解析JSON，自动处理转义字符（核心步骤）
+	// 定义与服务端回调数据结构一致的结构体
+	type CallbackData struct {
+		UUID      string `json:"uuid"`
+		Success   bool   `json:"success"`
+		Message   string `json:"message"` // 这里会自动解码 \n 转义符
+		Timestamp string `json:"timestamp"`
+	}
+	var callbackData CallbackData
+	// 解码JSON数据（解码后 Message 中的 \n 会变为实际换行符）
+	if err := json.Unmarshal(respBody, &callbackData); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("parse callback JSON failed: " + err.Error()))
+		return
+	}
+
+	// 3. （可选）若仍有转义残留，手动替换（确保兼容性）
+	// 部分场景下JSON解码可能未完全处理，补充手动替换保险
+	formattedMessage := strings.ReplaceAll(callbackData.Message, "\\n", "\n")
+
+	// 4. 将格式化后的结果发送到通道
+	resultChan <- fmt.Sprintf(
+		"UUID: %s\nSuccess: %v\nTimestamp: %s\nMessage:\n%s",
+		callbackData.UUID,
+		callbackData.Success,
+		callbackData.Timestamp,
+		formattedMessage, // 使用解码后的格式化消息
+	)
+
 	// 响应服务端：回调接收成功
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("callback received success"))
@@ -134,6 +165,35 @@ func parseScriptTime(scriptTimeStr string, loc *time.Location) (time.Time, error
     return parsedTime, nil
 }
 
+// 【核心修改1】从环境变量读取，失败则从默认文件读取
+func getStartTime() string {
+    // 1. 优先读取环境变量 START_TIME
+    if envTime := os.Getenv("START_TIME"); envTime != "" {
+        fmt.Printf("[时间读取] 从环境变量获取 START_TIME: %s\n", envTime)
+        return envTime
+    }
+
+    // 2. 环境变量为空，尝试从默认文件读取
+    fmt.Printf("[时间读取] 环境变量为空，尝试从文件 %s 读取\n", defaultTimeFilePath)
+    fileContent, err := ioutil.ReadFile(defaultTimeFilePath)
+    if err != nil {
+        // 捕获文件读取异常（如文件不存在、权限不足）
+        fmt.Printf("[时间读取] 读取文件失败: %v（将返回空字符串）\n", err)
+        return ""
+    }
+
+    // 3. 处理文件内容（去除换行符、空格）
+    fileTime := strings.TrimSpace(string(fileContent)) // 需导入 "strings" 包
+    if fileTime == "" {
+        fmt.Printf("[时间读取] 文件内容为空\n")
+        return ""
+    }
+
+    fmt.Printf("[时间读取] 从文件获取 START_TIME: %s\n", fileTime)
+    return fileTime
+}
+
+
 func main(){
     // 读取嵌入的时区数据
     data, err := tzData.ReadFile("tzdata/Asia/Shanghai")
@@ -147,9 +207,9 @@ func main(){
     }
 
     //2. 读取脚本传递的 START_TIME 环境变量
-    scriptStartTimeStr := getEnv("START_TIME", "")
+    scriptStartTimeStr := getStartTime()
     if scriptStartTimeStr == "" {
-        fmt.Printf("[警告] 未收到脚本传递的启动时间，跳过耗时计算\n")
+        fmt.Printf("[警告] 未获取到启动时间（环境变量和文件均为空），跳过耗时计算\n")
     }
 
     // 3. 打印启动信息
@@ -188,7 +248,14 @@ func main(){
     // 3. 构建服务端请求地址（保留原环境变量逻辑）
     NODE_NAME := getEnv("NODE_NAME", "localhost")
     PORT := getEnv("PORT", "8800")
-    serverUrl := "http://" + NODE_NAME + ":" + PORT + "/micro"
+    // 根据任务类型选择请求的接口
+    var serverUrl string
+    if taskType == "hadoop" {
+        serverUrl = "http://" + NODE_NAME + ":" + PORT + "/hadoop"
+    } else {
+        serverUrl = "http://" + NODE_NAME + ":" + PORT + "/micro"
+    }
+    // serverUrl := "http://" + NODE_NAME + ":" + PORT + "/micro"
     fmt.Printf("[请求地址] 服务端: %s\n", serverUrl)
 
     // 4. 获取客户端真实IP（自动检测，失败时降级）
