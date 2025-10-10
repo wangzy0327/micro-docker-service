@@ -8,4 +8,4 @@ current_time=$(date +"%H:%M:%S.%3N")
 echo "开始时间: $current_time"
 
 # 运行 Docker 命令
-docker run --privileged --net=host -it -v /dev:/dev  -v /proc:/proc -e START_TIME="$current_time" scratch-client /scratch0
+docker run --privileged --net=host -it -v /dev:/dev   -v/time:/time -e START_TIME="$current_time" scratch-client:amd64 /scratch0 -input input/input1 -output output/output1 
