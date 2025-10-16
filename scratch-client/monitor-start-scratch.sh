@@ -14,7 +14,9 @@ LOG_FILE="docker_run_logs_$(date +%Y%m%d_%H%M%S).txt"
 echo "日志将保存到: $LOG_FILE" | tee -a "$LOG_FILE"
 
 # 总运行时间30分钟（1800秒）
-TOTAL_DURATION=1800
+#TOTAL_DURATION=1800
+# 总运行时间24h
+TOTAL_DURATION=$((3600*24+1000))
 # 记录当前已运行时间
 elapsed_time=0
 
@@ -26,7 +28,7 @@ while [ $elapsed_time -lt $TOTAL_DURATION ]; do
     
     random_num=$(( RANDOM % 8 + 1 ))
     # 运行 Docker 命令并将输出重定向到日志文件
-    docker run --privileged --net=host -it -v /dev:/dev -v/time:/time -e START_TIME="$current_time" scratch-client:amd64 /scratch0 -input input/input$random_num -output output/output$random_num  2>&1 | tee -a "$LOG_FILE"
+    docker run --privileged --net=host --rm -it -v /dev:/dev -v/time:/time -e START_TIME="$current_time" scratch-client:amd64 /scratch0 -input input/input$random_num -output output/output$random_num  2>&1 | tee -a "$LOG_FILE"
     
     # 记录完成时间
     current_time=$(date +"%H:%M:%S.%3N")
@@ -34,10 +36,12 @@ while [ $elapsed_time -lt $TOTAL_DURATION ]; do
     
     # 计算下次执行前的随机等待时间（5-10分钟，转换为秒）
     # $RANDOM 生成0-32767的随机数，取模300得到0-299，加300得到300-599秒（5-10分钟）
-    wait_seconds=$(( RANDOM % 300 + 300 ))
+    #wait_seconds=$(( RANDOM % 300 + 300 ))
+    wait_seconds=$(( RANDOM % 60 + 180 ))
     wait_minutes=$(echo "scale=2; $wait_seconds / 60" | bc)
     
-    echo "下一次任务将在 $wait_minutes 后提交执行" | tee -a "$LOG_FILE"
+    #echo "下一次任务将在 $wait_minutes 后提交执行" | tee -a "$LOG_FILE"
+    echo "等待下一次任务提交执行" | tee -a "$LOG_FILE"
     
     # 等待随机时间
     sleep $wait_seconds
