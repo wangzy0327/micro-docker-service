@@ -31,8 +31,8 @@ const defaultTimeFilePath = "/time/start-time.txt"
 
 func Init(){
     // 通过命令行参数读取input和output，默认值分别为input/input1和output/output1
-    flag.StringVar(&input, "input", "input/input1", "project input path")
-    flag.StringVar(&output, "output", "output/output1", "project output path")
+    flag.StringVar(&input, "input", "yolov3", "project input ")
+    flag.StringVar(&output, "output", "output/output1", "project output ")
     flag.StringVar(&taskType, "type", "hadoop", "Task type: micro/hadoop")
 }
 
@@ -259,4 +259,5 @@ func main(){
     wg.Wait()
     fmt.Printf("%s 任务结束......\n", uuidStr)
 }
+
 
